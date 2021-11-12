@@ -1,45 +1,36 @@
 const turn_manager = {
     
-    interval: 150,   // is this millisecond?
-
     entity_set: new Set(),   // values will be unique, iterate in insertion order
                              // functions: add(), remove()
     
-    lastCall: Date.now(),  // ms
-               // 233
+    add_entity: (e) => turn_manager.entity_set.add(e),
 
-    addEntity: (e) => turn_manager.entity_set.add(e),
+    remove_entity: (e) => turn_manager.entity_set.remove(e),
 
-    removeEntity: (e) => turn_manager.entity_set.remove(e),
+    refresh_all_turns: () => {
+        turn_manager.entity_set.forEach(e => e.refresh_turn());
+        turn_manager.current_index = 0;
+    },
 
-    refresh: () => turn_manager.entity_set.forEach(e => e.refresh()),  // not sure what this does
+    current_index: 0,
 
-    turn: () => {
+    take_current_entity_turn: () => {
 
-        let now = Date.now(); 
+        if (turn_manager.entity_set.size > 0) {
 
-        // only allow this turn to run if 150 ms has elapsed since the last
-        // turn, so the player can't just hold down the arrow key and cause
-        // turns to happen at blistering speeds.
-        let limit = turn_manager.lastCall + turn_manager.interval;   
+            // convert set to array in order to access specific element
+            let entity_set_copy = [...turn_manager.entity_set]; 
+            let e = entity_set_copy[turn_manager.current_index];
 
-        if (now > limit) {   // if (233 > 150)
-
-            for (let e of turn_manager.entity_set) {
-                
-                if (!e.over()) {
-
-                    e.turn();
-
-                    break; // jump out of for loop
-                }
+            if (!e.turn_is_over()) {
+                e.take_turn();
+            } else {
+                turn_manager.current_index++;
             }
-            
-            turn_manager.lastCall = Date.now();   // 275
         }
     },
 
-    over: () => [...turn_manager.entity_set].every(e => e.over()),   // shouldn't this be a ;
+    all_turns_are_over: () => [...turn_manager.entity_set].every(e => e.turn_is_over()),
 }
 
 export default turn_manager

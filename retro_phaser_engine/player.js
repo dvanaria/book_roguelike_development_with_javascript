@@ -3,12 +3,12 @@ import board from "./board.js"
 // All entities in the game (player, monsters, etc) must implement the following
 // methods:
 //
-//     refresh()  - called at the beginning of a new turn, resets movement
+//     refresh_turn()  - called at the beginning of a new turn, resets movement
 //                  points
 //
-//     turn() - expends are action points this entity is allowed
+//     take_turn() - expends are action points this entity is allowed
 //
-//     done() - a test (boolean) - is this entity done with it's turn?
+//     turn_is_over() - a test (boolean) - is this entity done with it's turn?
 //
 //
 
@@ -17,67 +17,65 @@ export default class PlayerCharacter {
 
     constructor(x, y) {
 
-        this.movement_points = 1;
+        this.movement_points = 2;
         this.arrow_keys = board.scene.input.keyboard.createCursorKeys();
         this.x = x;
         this.y = y;
         this.sprite_index = 29;
+        this.hp = 10;
+        this.tweening = false;   // to allow for "tweens"
 
-        board.tilemap.putTileAt(this.sprite_index, this.x, this.y);
+        board.initialize_entity_graphics(this);
     }
 
-    refresh() {
-        this.movement_points = 1;
+    refresh_turn() {
+        this.movement_points = 2;
     }
 
-    turn() {
+    take_turn() {
 
-        let old_x = this.x;
-        let old_y = this.y;
+        let new_x = this.x;
+        let new_y = this.y;
         let moved = false;
 
-        if (this.movement_points > 0) {
+        if (this.movement_points > 0 && !this.tweening) {
 
             if (this.arrow_keys.left.isDown) {
-                this.x -= 1;
+                new_x -= 1;
                 moved = true;
             }
 
             if (this.arrow_keys.right.isDown) {
-                this.x += 1;
+                new_x += 1;
                 moved = true;
             }
 
             if (this.arrow_keys.up.isDown) {
-                this.y -= 1;
+                new_y -= 1;
                 moved = true;
             }
 
             if (this.arrow_keys.down.isDown) {
-                this.y += 1;
+                new_y += 1;
                 moved = true;
             }
 
             if (moved) {
                 this.movement_points -= 1;
+
+                if( board.is_walkable_tile(new_x, new_y) ) {
+                    board.move_entity_to(this, new_x, new_y);
+                }
             }
         }
-
-        // wall collision check
-        let tile_at_destination = board.tilemap.getTileAt(this.x, this.y);
-        if (tile_at_destination.index == board.tile_index.wall) {
-            this.x = old_x;
-            this.y = old_y;
+    
+        if (this.hp <= 3) {
+            this.sprite_handle.tint = Phaser.Display.Color.GetColor(255,0,0);
         }
-
-        // tile movement code
-        if (this.x !== old_x || this.y !== old_y) {
-            board.tilemap.putTileAt(this.sprite_index, this.x, this.y);
-            board.tilemap.putTileAt(board.tile_index.floor, old_x, old_y);
-        }
+    
     }
 
-    over() {
-        return this.movement_points == 0;
+    turn_is_over() {
+        return this.movement_points == 0 && !this.tweening;
     }
 }

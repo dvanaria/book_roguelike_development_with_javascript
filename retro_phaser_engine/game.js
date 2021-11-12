@@ -1,27 +1,32 @@
 import board from "./board.js"
 import turn_manager from "./turn_manager.js"
 import PlayerCharacter from "./player.js"
+import BasicMonster from "./monster.js"
 
 const play_game_scene = {
 
     preload: function () {
         
-        const tile_size = 16;
-
         // Load tiles and sprites (glyphs for both of these are all contained in
         // the "spritesheet" .png master image). The "handle" to access this
         // loaded asset, confusingly, becomes the supplied string argument 
         // "spritesheet".
         this.load.spritesheet('spritesheet', 'assets/roguelike_spritesheet.png', 
-            { frameWidth: tile_size, frameHeight: tile_size, spacing: 1 });
-
+            { 
+                frameWidth: 16, 
+                frameHeight: 16, 
+                spacing: 1 
+            });
     },
 
     create: function () {
 
         board.initialize(this);
-        let player = new PlayerCharacter(15, 15);
-        turn_manager.addEntity(player)
+        board.player = new PlayerCharacter(15, 15);
+        turn_manager.add_entity(board.player);
+        turn_manager.add_entity(new BasicMonster(70, 8));
+        turn_manager.add_entity(new BasicMonster(34, 5));
+        turn_manager.add_entity(new BasicMonster(44, 18));
     },
 
     update: function () {
@@ -30,13 +35,13 @@ const play_game_scene = {
 
         // step one: if the previous turn is over, reset all entities
         // action/movement points to 0
-        if (turn_manager.over()) {
-            turn_manager.refresh();
+        if (turn_manager.all_turns_are_over()) {
+            turn_manager.refresh_all_turns();
         }
 
         // step two: have the turn manager update every entity's turn() until
         // they have each expended all their action points
-        turn_manager.turn();
+        turn_manager.take_current_entity_turn();
     }
 }
 
