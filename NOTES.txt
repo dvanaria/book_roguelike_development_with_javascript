@@ -1,0 +1,25 @@
+
+    
+    True pixel resolution of the browser's window (verified in Paint):
+
+        1900 x 842
+
+    My laptop screen is set to:
+
+        1920 x 1080
+
+    So yes, the browser window pixel resolution is accurate.
+
+
+    In code (JS), the way to get the accurate pixel resolution from the browser
+    is to use:
+
+        window.innerWidth     (1056? no should be 1900)
+        windoe.innerHeight    (476? no should be 842)
+
+        HOWEVER, this isn't the whole story!
+
+        You need to MULTIPLY these values by your device's DPR (Device Pixel Ratio).
+        What is DPR? 
+
+            x window.devicePixelRatio

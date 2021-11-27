@@ -7,12 +7,12 @@ const turn_manager = {
 
     remove_entity: (e) => turn_manager.entity_set.remove(e),
 
+    current_index: 0,
+
     refresh_all_turns: () => {
         turn_manager.entity_set.forEach(e => e.refresh_turn());
         turn_manager.current_index = 0;
     },
-
-    current_index: 0,
 
     take_current_entity_turn: () => {
 
